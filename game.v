@@ -36,9 +36,9 @@ module game (CLOCK_50, SW, KEY, LEDR, HEX0, HEX1, HEX2, HEX3, HEX4, HEX5,
   wire resetn;
   assign resetn = KEY[0];
 
-  // ------------------------------------------------------------------
+ 
   // Keyboard
-  // ------------------------------------------------------------------
+
   wire [3:0] lane_press, lane_held;
   wire start_key, advance_key;
 
@@ -53,9 +53,8 @@ module game (CLOCK_50, SW, KEY, LEDR, HEX0, HEX1, HEX2, HEX3, HEX4, HEX5,
     .advance_key(advance_key)
   );
 
-  // ------------------------------------------------------------------
   // Frame tick (60 Hz), song timer and game FSM
-  // ------------------------------------------------------------------
+
   wire tick;
   frame_tick FT (.clk(CLOCK_50), .resetn(resetn), .tick(tick));
 
@@ -88,9 +87,9 @@ module game (CLOCK_50, SW, KEY, LEDR, HEX0, HEX1, HEX2, HEX3, HEX4, HEX5,
   wire enable;
   assign enable = in_play;
 
-  // ------------------------------------------------------------------
+
   // Scroll timer (restarts every time a game begins)
-  // ------------------------------------------------------------------
+
   wire scroll_tick;
   scroll_timer #(.FRAMES_PER_STEP(FRAMES_PER_STEP)) ST (
     .clock(CLOCK_50),
@@ -99,10 +98,10 @@ module game (CLOCK_50, SW, KEY, LEDR, HEX0, HEX1, HEX2, HEX3, HEX4, HEX5,
     .scroll_tick(scroll_tick)
   );
 
-  // ------------------------------------------------------------------
+ 
   // TEMPORARY NOTE CHART: REPLACE W/ NOTE CHART ROM
   // step counts 0 to 7, a note spawns in a different lane every 2 steps
-  // ------------------------------------------------------------------
+
   reg [2:0] step;
   always @(posedge CLOCK_50) begin
     if (!resetn || !in_play)
@@ -115,9 +114,8 @@ module game (CLOCK_50, SW, KEY, LEDR, HEX0, HEX1, HEX2, HEX3, HEX4, HEX5,
   assign spawn = {step == 3'd6, step == 3'd4, step == 3'd2, step == 3'd0} &
                  {4{scroll_tick}};
 
-  // ------------------------------------------------------------------
   // The 4 lanes
-  // ------------------------------------------------------------------
+
   wire [59:0] notes;
   wire [3:0] hit, miss;
 
@@ -137,9 +135,9 @@ module game (CLOCK_50, SW, KEY, LEDR, HEX0, HEX1, HEX2, HEX3, HEX4, HEX5,
            .scroll_tick(scroll_tick), .spawn(spawn[3]), .press(lane_held[3]),
            .notes(notes[59:45]), .hit(hit[3]), .miss(miss[3]));
 
-  // ------------------------------------------------------------------
+  
   // Score on the HEX displays (cleared when a new game starts)
-  // ------------------------------------------------------------------
+
   wire any_hit;
   assign any_hit = hit[0] | hit[1] | hit[2] | hit[3];
 
@@ -159,9 +157,9 @@ module game (CLOCK_50, SW, KEY, LEDR, HEX0, HEX1, HEX2, HEX3, HEX4, HEX5,
   assign HEX4 = 7'b1111111;
   assign HEX5 = 7'b1111111;
 
-  // ------------------------------------------------------------------
-  // Fretboard (VGA pixel stream)
-  // ------------------------------------------------------------------
+  
+  // Fretboard 
+  
   wire done;
   fretboard #(.nX(nX), .nY(nY)) FB (
     .clock(CLOCK_50),
@@ -174,9 +172,9 @@ module game (CLOCK_50, SW, KEY, LEDR, HEX0, HEX1, HEX2, HEX3, HEX4, HEX5,
     .done(done)
   );
 
-  // ------------------------------------------------------------------
+
   // Debug LEDs
-  // ------------------------------------------------------------------
+  
   assign LEDR[0] = in_start;
   assign LEDR[1] = in_play;
   assign LEDR[2] = in_gameover;
